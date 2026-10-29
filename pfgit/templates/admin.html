@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Administración</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f2f4f7;
+            margin: 0;
+            padding: 16px
+        }
+
+        form.n,
+        .p {
+            background: #fff;
+            padding: 14px;
+            border-radius: 10px;
+            margin-top: 12px;
+            box-shadow: 0 1px 6px #0002
+        }
+
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            font-size: 16px;
+            box-sizing: border-box
+        }
+
+        button {
+            background: #1a5fb4;
+            color: #fff;
+            border: 0;
+            border-radius: 8px
+        }
+
+        .p button {
+            width: auto;
+            padding: 8px 14px;
+            background: #c01c28
+        }
+
+        .p.off {
+            opacity: .55
+        }
+
+        .p.off button {
+            background: #26a269
+        }
+
+        .e {
+            color: #c01c28;
+            margin-top: 10px
+        }
+
+        small {
+            color: #555
+        }
+    </style>
+</head>
+
+<body>
+    <a href="{{ url_for('inicio') }}">← Inicio</a>
+    <h2>Administración</h2>
+    {% if err %}<div class="e">{{ err }}</div>{% endif %}
+
+    <form class="n" method="post" action="{{ url_for('agregar') }}">
+        <b>Agregar personal</b>
+        <input name="nom" placeholder="Nombre" required>
+        <input name="ape" placeholder="Apellido" required>
+        <input name="usu" placeholder="Usuario" required>
+        <input name="clave" type="password" placeholder="Contraseña temporal (mín. 6)" required>
+        <select name="cat">
+            <option value="prof">Profesor</option>
+            <option value="emp">Empleado</option>
+            <option value="coord">Coordinador</option>
+            <option value="dir">Director</option>
+        </select>
+        <select name="rol">
+            <option value="pers">Personal normal</option>
+            <option value="admin">Administrador</option>
+        </select>
+        <button>Agregar</button>
+    </form>
+
+    <h3>Personal</h3>
+    {% for p in ps %}
+    <div class="p {{ '' if p[6] else 'off' }}">
+        <b>{{ p[1] }} {{ p[2] }}</b><br>
+        <small>{{ p[3] }} · {{ p[4] }} · {{ p[5] }}{{ '' if p[6] else ' · DESACTIVADO' }}</small>
+        {% if p[0] != yo %}
+        <form method="post" action="{{ url_for('estado', pid=p[0]) }}">
+            <button>{{ 'Desactivar' if p[6] else 'Reactivar' }}</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</body>
+
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Marcaje</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f2f4f7;
+            margin: 0;
+            padding: 20px;
+            text-align: center
+        }
+
+        button {
+            width: 100%;
+            max-width: 340px;
+            padding: 18px;
+            font-size: 20px;
+            background: #1a5fb4;
+            color: #fff;
+            border: 0;
+            border-radius: 12px;
+            margin-top: 24px
+        }
+
+        button:disabled {
+            background: #999
+        }
+
+        #m {
+            margin-top: 20px;
+            font-size: 18px
+        }
+
+        .ok {
+            color: #26a269
+        }
+
+        .no {
+            color: #c01c28
+        }
+
+        a {
+            display: block;
+            margin-top: 24px;
+            color: #1a5fb4
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Hola, {{ nom }}</h2>
+    <button id="b">{{ "Marcar entrada" if t == "ent" else "Marcar salida" }}</button>
+    <div id="m"></div>
+    <a href="{{ url_for('inicio') }}">Volver al inicio</a>
+    <script>
+        const b = document.getElementById("b");
+        const m = document.getElementById("m");
+        function msg(t, c) { m.textContent = t; m.className = c; }
+        b.onclick = () => {
+            b.disabled = true;
+            msg("Obteniendo ubicación...", "");
+            navigator.geolocation.getCurrentPosition(async p => {
+                const r = await fetch("/api/marcar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ lat: p.coords.latitude, lon: p.coords.longitude, prec: p.coords.accuracy })
+                });
+                const j = await r.json();
+                msg(j.msg, j.ok ? "ok" : "no");
+                if (j.ok) setTimeout(() => location.reload(), 2000);
+                else b.disabled = false;
+            }, e => {
+                msg(e.code === 1 ? "Debes permitir el acceso a la ubicación" : "No se pudo obtener la ubicación", "no");
+                b.disabled = false;
+            }, { enableHighAccuracy: true, timeout: 15000 });
+        };
+    </script>
+</body>
+
+</html>
